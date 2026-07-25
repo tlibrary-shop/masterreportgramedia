@@ -10,6 +10,8 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <!-- PapaParse untuk mengambil data dari Google Sheet -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- html2pdf untuk convert HTML ke PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .drag-active {
             border-color: #3b82f6 !important;
@@ -105,8 +107,15 @@
                 <button onclick="closeModal()" class="text-white hover:text-gray-300 font-bold text-2xl md:text-3xl leading-none">&times;</button>
             </div>
             
-            <!-- Body Modal -->
-            <div class="p-4 md:p-6 overflow-y-auto">
+            <!-- Body Modal (Bagian ini yang akan di-convert ke PDF) -->
+            <div id="pdf-content" class="p-4 md:p-6 overflow-y-auto bg-white">
+                
+                <!-- Judul khusus PDF (Sembunyi saat di web) -->
+                <div id="pdf-header-title" class="hidden text-center mb-6 border-b-2 border-gray-800 pb-2">
+                    <h2 class="text-2xl font-bold text-gray-800">Laporan Rincian Stok & Penjualan Gramedia</h2>
+                    <p class="text-gray-600 text-sm mt-1">Dicetak pada: <span id="pdf-print-date"></span></p>
+                </div>
+
                 <!-- Info Buku -->
                 <div class="bg-blue-50 border border-blue-200 p-3 md:p-4 rounded-lg mb-4 md:mb-5 text-xs md:text-sm text-left">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
@@ -136,10 +145,15 @@
 
             <!-- Footer Modal -->
             <div class="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3">
-                <button onclick="exportDetailToExcel()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 md:px-6 rounded-lg transition flex justify-center items-center gap-2 text-sm md:text-base">
-                    📥 Export Detail Excel
-                </button>
-                <button onclick="closeModal()" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 md:px-6 rounded-lg transition text-sm md:text-base">Tutup</button>
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button onclick="exportDetailToExcel()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm md:text-base">
+                        📥 Export Excel
+                    </button>
+                    <button onclick="exportDetailToPDF()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm md:text-base">
+                        📄 Export PDF
+                    </button>
+                </div>
+                <button onclick="closeModal()" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition text-sm md:text-base">Tutup</button>
             </div>
         </div>
     </div>
@@ -152,7 +166,7 @@
         
         // Array global untuk export khusus data dari Modal
         let currentDetailData = []; 
-        let currentDetailFileName = "Detail_Toko.xlsx";
+        let currentDetailFileName = "Detail_Toko";
 
         // URL Google Sheet 1 (Utama)
         const sheetIdMain = '1U2jYvdm-ZYXOSh2MQe04nQJXNkfOExIiFvmh8K-hNkM';
@@ -527,11 +541,14 @@
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const yyyy = now.getFullYear();
             const dateStr = dd + mm + yyyy;
+            
+            // Tampilkan tanggal cetak untuk keperluan PDF
+            document.getElementById('pdf-print-date').innerText = `${dd}/${mm}/${yyyy}`;
 
             const safeJudul = judulItem.replace(/[^a-zA-Z0-9 ]/g, "").trim().replace(/\s+/g, '-').toUpperCase();
 
             currentDetailData = [];
-            currentDetailFileName = `Detail_Toko_${dateStr}_${safeJudul}.xlsx`;
+            currentDetailFileName = `Detail_Toko_${dateStr}_${safeJudul}`; // Tanpa ekstensi, ekstensi diatur di fungsi export
 
             const stores = dataStore.filter(row => cleanStr(row[1]) === cleanStr(idOrin));
             let hasData = false;
@@ -594,7 +611,37 @@
             const worksheet = XLSX.utils.json_to_sheet(currentDetailData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Rincian_Toko");
-            XLSX.writeFile(workbook, currentDetailFileName);
+            XLSX.writeFile(workbook, currentDetailFileName + ".xlsx");
+        }
+
+        // ==========================================
+        // FUNGSI EXPORT TO PDF (Dari Tampilan Web Modal)
+        // ==========================================
+        function exportDetailToPDF() {
+            if (currentDetailData.length === 0) {
+                alert("Tidak ada rincian data untuk di-export ke PDF.");
+                return;
+            }
+
+            // Elemen yang akan di-convert (Bagian Body Modal)
+            const element = document.getElementById('pdf-content');
+            const pdfHeader = document.getElementById('pdf-header-title');
+            
+            // Tampilkan Header Judul Resmi sementara proses cetak PDF
+            pdfHeader.classList.remove('hidden');
+
+            const opt = {
+                margin:       [0.5, 0.5, 0.5, 0.5], // margin in inches
+                filename:     currentDetailFileName + ".pdf",
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true }, // scale 2 untuk resolusi yang jernih
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate dan simpan PDF, setelah selesai sembunyikan lagi Header Judul
+            html2pdf().set(opt).from(element).save().then(() => {
+                pdfHeader.classList.add('hidden');
+            });
         }
     </script>
 </body>
