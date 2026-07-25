@@ -7,564 +7,420 @@
 <title>Dashboard Reporting</title>
 
 <style>
-
-body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:#eef1f5;
-  transition:0.3s;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #eef1f5;
+  transition: 0.3s;
+  overflow-x: hidden;
 }
 
 /* BANNER */
-.banner{
-  width:100%;
-  height:180px;
-  overflow:hidden;
+.banner {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
 }
 
-.banner img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* TITLE */
-.title{
-  text-align:center;
-  font-size:48px;
-  font-weight:700;
-  margin:20px 0 20px;
-  color:#111;
+.title {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 700;
+  margin: 20px 0 20px;
+  color: #111;
   font-family: 'Poppins', sans-serif;
 }
 
 /* LAYOUT */
-.container{
-  display:flex;
-  height:78vh;
-  gap:10px;
-  padding:10px;
-  box-sizing:border-box;
+.container {
+  display: flex;
+  height: 78vh;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 /* SIDEBAR */
-.sidebar{
-  width:320px;
-  background:white;
-  border-radius:12px;
-  padding:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  overflow-y:auto;
-  transition:0.3s;
+.sidebar {
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease, left 0.3s ease;
 }
 
-.sidebar h2{
-  margin-top:0;
-  font-size:28px;
-  margin-bottom:15px;
+/* CLASS UNTUK MINIMIZE SIDEBAR (SEMBUNYI PENUH) */
+.sidebar.collapsed {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  border: none;
 }
 
-
-/* GAME HUB */
-
-function showGameHub(element){
-
-document.querySelectorAll(".menu-item").forEach(item=>item.classList.remove("active"));
-element.classList.add("active");
-
-document.getElementById("frame").style.display="none";
-document.getElementById("actions").style.display="none";
-document.getElementById("loading").style.display="none";
-document.getElementById("welcome").style.display="none"; document.getElementById("gameArea").style.display="none";
-
-const gameArea=document.getElementById("gameArea");
-gameArea.style.display="block";
-
-gameArea.innerHTML=`
-<div style="padding:40px;text-align:center;">
-<h1 style="font-size:48px;color:#0d2d52;">🎮 MINI GAMES</h1>
-<p>Pilih game favoritmu</p>
-
-<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:30px;">
-<button onclick="loadSnake()" style="padding:18px 30px;font-size:18px;">🐍 Snake</button>
-<button onclick="load2048()" style="padding:18px 30px;font-size:18px;">⊹ 2048</button>
-<button onclick="loadFlappy()" style="padding:18px 30px;font-size:18px;">📚 Flappy Book</button>
-</div>
-</div>`;
+/* --- MODE FOKUS: HANYA TAMPIL 1 MENU AKTIF --- */
+.sidebar.focus-mode {
+  width: fit-content; 
+  max-width: 320px;
+  overflow-y: hidden;
 }
 
-function loadSnake(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://funhtml5games.com/?play=snake2"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+.sidebar.focus-mode h2,
+.sidebar.focus-mode #searchInput,
+.sidebar.focus-mode hr,
+.sidebar.focus-mode .menu-item:not(.active) {
+  display: none !important; /* Sembunyikan semua elemen kecuali menu aktif */
 }
 
-function load2048(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://funhtml5games.com/?play=2048bit"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+.sidebar.focus-mode .menu-item.active {
+  margin-bottom: 0;
+  pointer-events: none; /* Tidak bisa diklik berulang kali saat sedang aktif */
+  box-shadow: 0 4px 12px rgba(13,124,193,0.3);
 }
 
-function loadFlappy(){
+/* ------------------------------------------- */
 
-gameArea.innerHTML=`
-<iframe
-src="https://funhtml5games.com/?play=flappy"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
+.sidebar h2 {
+  margin-top: 0;
+  font-size: 28px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+/* TOMBOL CLOSE SIDEBAR DI MOBILE */
+.close-sidebar {
+  display: none;
+  background: transparent;
+  color: inherit;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
 }
 
 /* SEARCH */
-#searchInput{
-  width:100%;
-  padding:12px;
-  margin-bottom:20px;
-  border:none;
-  border-radius:8px;
-  background:#f1f4f8;
-  font-size:14px;
-  box-sizing:border-box;
-  outline:none;
-  transition:0.3s;
+#searchInput {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f4f8;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: 0.3s;
 }
 
 /* MENU */
-.menu-item{
-  background:#0d7cc1;
-  color:white;
-  padding:14px;
-  margin-bottom:14px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:15px;
-  font-weight:600;
-  transition:0.2s;
+.menu-item {
+  background: #0d7cc1;
+  color: white;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.2s;
+  white-space: normal;
 }
 
-.menu-item:hover{
-  background:#095f93;
-  transform:translateY(-2px);
+.menu-item:hover {
+  background: #095f93;
+  transform: translateY(-2px);
 }
 
-.menu-item.active{
-  background:#063d63 !important;
-  transform:scale(1.02);
-  box-shadow:0 0 10px rgba(13,124,193,0.5);
+.menu-item.active {
+  background: #063d63 !important;
+  transform: scale(1.02);
 }
 
 /* MAIN */
-.main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
-.topbar{
-  display:flex;
-  gap:10px;
+.topbar {
+  display: flex;
+  gap: 10px;
 }
 
-.box{
-  flex:1;
-  background:white;
-  border-radius:12px;
-  padding:15px;
-  text-align:center;
-  font-size:22px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  transition:0.3s;
+/* HAMBURGER TOGGLE BUTTON */
+#sidebarToggle {
+  width: 70px;
+  border: none;
+  border-radius: 12px;
+  background: #0d7cc1;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#sidebarToggle:hover {
+  background: #095f93;
+  transform: scale(1.05);
+}
+
+.box {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: 0.3s;
 }
 
 /* DARK BUTTON */
-#darkToggle{
-  width:70px;
-  border:none;
-  border-radius:12px;
-  background:#111827;
-  color:white;
-  font-size:24px;
-  cursor:pointer;
-  transition:0.2s;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+#darkToggle {
+  width: 70px;
+  border: none;
+  border-radius: 12px;
+  background: #111827;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-#darkToggle:hover{
-  transform:scale(1.05);
+#darkToggle:hover {
+  transform: scale(1.05);
 }
 
 /* VIEWER */
-.viewer{
-  flex:1;
-  background:white;
-  border-radius:12px;
-  overflow:hidden;
-  position:relative;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  transition:0.3s;
+.viewer {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: 0.3s;
 }
 
-iframe{
-  width:100%;
-  height:calc(100% - 60px);
-  border:none;
-  display:none;
+iframe {
+  width: 100%;
+  height: calc(100% - 60px);
+  border: none;
+  display: none;
 }
 
 /* WELCOME */
-.welcome{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:40px;
-  background:linear-gradient(135deg,#f8fbff,#eef5ff);
-  transition:0.3s;
+.welcome {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg,#f8fbff,#eef5ff);
+  transition: 0.3s;
 }
 
-.welcome h1{
-  font-size:48px;
-  margin-bottom:10px;
-  color:#0d2d52;
+.welcome h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  color: #0d2d52;
 }
 
-.welcome p{
-  font-size:20px;
-  color:#555;
-  max-width:700px;
-  line-height:1.6;
+.welcome p {
+  font-size: 20px;
+  color: #555;
+  max-width: 700px;
+  line-height: 1.6;
 }
 
-.quote{
-  margin-top:25px;
-  font-style:italic;
-  color:#888;
-  font-size:18px;
+.quote {
+  margin-top: 25px;
+  font-style: italic;
+  color: #888;
+  font-size: 18px;
 }
 
 /* MODERN SKELETON */
-.skeleton{
-  position:absolute;
-  inset:0;
-  display:none;
-  padding:20px;
-  background:white;
-  z-index:10;
+.skeleton {
+  position: absolute;
+  inset: 0;
+  display: none;
+  padding: 20px;
+  background: white;
+  z-index: 10;
 }
 
-.loading-modern-text{
-  font-size:18px;
-  font-weight:600;
-  color:#6b7280;
-  margin-bottom:25px;
+.loading-modern-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 25px;
 }
 
-.skeleton-line{
-  height:22px;
-  border-radius:8px;
-  margin-bottom:18px;
-  background:linear-gradient(
-    90deg,
-    #ececec 25%,
-    #f5f5f5 37%,
-    #ececec 63%
-  );
-  background-size:400% 100%;
-  animation:skeleton-loading 1.4s ease infinite;
+.skeleton-line {
+  height: 22px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 37%, #ececec 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
 }
 
-.skeleton-line.large{
-  height:45px;
+.skeleton-line.large { height: 45px; }
+.skeleton-line.medium { width: 70%; }
+.skeleton-line.small { width: 40%; }
+
+.skeleton-table { margin-top: 30px; }
+.skeleton-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.skeleton-cell {
+  flex: 1;
+  height: 30px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 37%, #ececec 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
 }
 
-.skeleton-line.medium{
-  width:70%;
-}
-
-.skeleton-line.small{
-  width:40%;
-}
-
-.skeleton-table{
-  margin-top:30px;
-}
-
-.skeleton-row{
-  display:flex;
-  gap:10px;
-  margin-bottom:14px;
-}
-
-.skeleton-cell{
-  flex:1;
-  height:30px;
-  border-radius:6px;
-  background:linear-gradient(
-    90deg,
-    #ececec 25%,
-    #f5f5f5 37%,
-    #ececec 63%
-  );
-  background-size:400% 100%;
-  animation:skeleton-loading 1.4s ease infinite;
-}
-
-@keyframes skeleton-loading{
-  0%{
-    background-position:100% 50%;
-  }
-  100%{
-    background-position:0 50%;
-  }
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
 }
 
 /* ACTIONS */
-.actions{
-  display:none;
-  gap:10px;
-  padding:12px;
-  background:white;
-  border-top:1px solid #eee;
+.actions {
+  display: none;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #eee;
 }
 
-.action-btn{
-  background:#0d7cc1;
-  color:white;
-  padding:10px 16px;
-  border-radius:8px;
-  text-decoration:none;
-  font-size:14px;
-  font-weight:600;
-  transition:0.2s;
+.action-btn {
+  background: #0d7cc1;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
-.action-btn:hover{
-  background:#095f93;
+.action-btn:hover {
+  background: #095f93;
 }
 
 /* DARK MODE */
-body.dark{
-  background:#111827;
-  color:white;
-}
-
+body.dark { background: #111827; color: white; }
 body.dark .sidebar,
 body.dark .box,
 body.dark .viewer,
-body.dark .actions{
-  background:#1f2937;
-  color:white;
-}
-
-body.dark .title{
-  color:white;
-}
-
-body.dark .welcome{
-  background:linear-gradient(135deg,#111827,#1f2937);
-}
-
+body.dark .actions { background: #1f2937; color: white; }
+body.dark .title { color: white; }
+body.dark .welcome { background: linear-gradient(135deg,#111827,#1f2937); }
 body.dark .welcome h1,
 body.dark .welcome p,
-body.dark .quote{
-  color:#f3f4f6;
-}
-
-body.dark #searchInput{
-  background:#374151;
-  color:white;
-}
-
-body.dark iframe{
-  background:white;
-}
-
-body.dark .skeleton{
-  background:#1f2937;
-}
-
-body.dark .loading-modern-text{
-  color:#d1d5db;
-}
-
+body.dark .quote { color: #f3f4f6; }
+body.dark #searchInput { background: #374151; color: white; }
+body.dark iframe { background: white; }
+body.dark .skeleton { background: #1f2937; }
+body.dark .loading-modern-text { color: #d1d5db; }
 body.dark .skeleton-line,
-body.dark .skeleton-cell{
-  background:linear-gradient(
-    90deg,
-    #2b3545 25%,
-    #374151 37%,
-    #2b3545 63%
-  );
-  background-size:400% 100%;
+body.dark .skeleton-cell {
+  background: linear-gradient(90deg, #2b3545 25%, #374151 37%, #2b3545 63%);
+  background-size: 400% 100%;
 }
+body.dark #sidebarToggle { background: #1f2937; }
+body.dark #sidebarToggle:hover { background: #374151; }
 
 /* MOBILE RESPONSIVE */
-@media (max-width:768px){
+@media (max-width: 768px) {
+  .banner { height: 110px; }
+  .title { font-size: 34px; margin: 20px 0; padding: 0 10px; }
+  
+  .container {
+    flex-direction: column;
+    height: auto;
+    position: relative;
+  }
+  
+  /* OFF-CANVAS SIDEBAR UNTUK MOBILE */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -350px;
+    width: 280px;
+    height: 100vh;
+    z-index: 9999;
+    border-radius: 0 12px 12px 0;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+    padding: 20px;
+    opacity: 1 !important; 
+  }
+  
+  .sidebar.active {
+    left: 0; 
+  }
 
-.banner{
-  height:110px;
-}
-
-.title{
-  font-size:34px;
-  margin:20px 0;
-  padding:0 10px;
-}
-
-.container{
-  flex-direction:column;
-  height:auto;
-}
-
-.sidebar{
-  width:auto;
-}
-
-.main{
-  width:100%;
-}
-
-.topbar{
-  flex-direction:column;
-}
-
-.box{
-  font-size:18px;
-}
-
-#darkToggle{
-  width:100%;
-  height:55px;
-}
-
-.viewer{
-  height:75vh;
-}
-
-.welcome{
-  padding:20px;
-}
-
-.welcome h1{
-  font-size:36px;
-}
-
-.welcome p{
-  font-size:16px;
-}
-
-.quote{
-  font-size:14px;
-}
-
-.actions{
-  flex-direction:column;
-}
-
-.action-btn{
-  text-align:center;
-}
-
-iframe{
-  height:calc(100% - 120px);
-}
-
-.skeleton-row{
-  flex-direction:column;
-}
-
+  .close-sidebar { display: block; }
+  
+  .main { width: 100%; }
+  .topbar { flex-wrap: wrap; }
+  .box { font-size: 18px; }
+  
+  #sidebarToggle, #darkToggle {
+    width: 55px; 
+    height: 55px;
+  }
+  
+  .viewer { height: 75vh; }
+  .welcome { padding: 20px; }
+  .welcome h1 { font-size: 36px; }
+  .welcome p { font-size: 16px; }
+  .quote { font-size: 14px; }
+  .actions { flex-direction: column; }
+  .action-btn { text-align: center; }
+  iframe { height: calc(100% - 120px); }
+  .skeleton-row { flex-direction: column; }
 }
 
 /* BUTTERFLY */
-
-.butterfly{
+.butterfly {
   position: fixed;
-    width: 100px;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.85;
-    transition: left 6s ease-in-out,
-                top 6s ease-in-out,
-                transform 2s ease-in-out;
+  width: 100px;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.85;
+  transition: left 6s ease-in-out, top 6s ease-in-out, transform 2s ease-in-out;
 }
 
-@keyframes fly1{
-
-  0%{
-    transform:translateX(0) translateY(0);
-  }
-
-  20%{
-    transform:translateX(20vw) translateY(-20px);
-  }
-
-  40%{
-    transform:translateX(40vw) translateY(15px);
-  }
-
-  60%{
-    transform:translateX(60vw) translateY(-30px);
-  }
-
-  80%{
-    transform:translateX(80vw) translateY(10px);
-  }
-
-  100%{
-    transform:translateX(120vw) translateY(-10px);
-  }
+@keyframes fly1 {
+  0% { transform:translateX(0) translateY(0); }
+  20% { transform:translateX(20vw) translateY(-20px); }
+  40% { transform:translateX(40vw) translateY(15px); }
+  60% { transform:translateX(60vw) translateY(-30px); }
+  80% { transform:translateX(80vw) translateY(10px); }
+  100% { transform:translateX(120vw) translateY(-10px); }
 }
-
-@keyframes fly2{
-
-  0%{
-    transform:translateX(0) translateY(0);
-  }
-
-  25%{
-    transform:translateX(25vw) translateY(40px);
-  }
-
-  50%{
-    transform:translateX(50vw) translateY(-20px);
-  }
-
-  75%{
-    transform:translateX(75vw) translateY(25px);
-  }
-
-  100%{
-    transform:translateX(120vw) translateY(0);
-  }
-}
-
 </style>
 </head>
 
@@ -583,9 +439,9 @@ DASHBOARD & REPORTING
 <div class="container">
 
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
 
-<h2>Menu Report</h2>
+<h2>Menu <button class="close-sidebar" onclick="closeSidebarOnly()">✖</button></h2>
 
 <input type="text"
 id="searchInput"
@@ -687,6 +543,11 @@ this)">
 <!-- TOPBAR -->
 <div class="topbar">
 
+<!-- TOMBOL TOGGLE SIDEBAR -->
+<button id="sidebarToggle" onclick="toggleSidebar()" title="Buka/Tutup Menu">
+☰
+</button>
+
 <div class="box" id="clock"></div>
 
 <div class="box" id="date"></div>
@@ -702,58 +563,33 @@ this)">
 
 <!-- MODERN SKELETON -->
 <div class="skeleton" id="loading">
-
-<div class="loading-modern-text">
-Loading Report...
-</div>
-
+<div class="loading-modern-text">Loading Report...</div>
 <div class="skeleton-line large"></div>
-
 <div class="skeleton-line medium"></div>
-
 <div class="skeleton-line small"></div>
-
 <div class="skeleton-table">
-
 <div class="skeleton-row">
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
+<div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div>
 </div>
-
 <div class="skeleton-row">
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
+<div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div>
 </div>
-
 <div class="skeleton-row">
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
-<div class="skeleton-cell"></div>
+<div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div><div class="skeleton-cell"></div>
 </div>
-
 </div>
-
 </div>
 
 <!-- WELCOME -->
 <div class="welcome" id="welcome">
-
 <h1>Selamat Datang 👋</h1>
-
 <p>
 Dashboard ini digunakan untuk mengakses berbagai report dan data Gramedia secara cepat, terpusat, dan efisien.
 Silakan pilih menu report di sebelah kiri untuk memulai.
 </p>
-
 <div class="quote">
 “Data yang tertata rapi membantu menghasilkan keputusan yang lebih baik.”
 </div>
-
 </div>
 
 <iframe id="frame"></iframe>
@@ -762,270 +598,198 @@ Silakan pilih menu report di sebelah kiri untuk memulai.
 
 <!-- ACTIONS -->
 <div class="actions" id="actions">
-
-<a id="openSheet"
-class="action-btn"
-target="_blank">
-🔗 Open Spreadsheet
-</a>
-
-<a id="downloadExcel"
-class="action-btn"
-target="_blank">
-⬇ Download Excel
-</a>
-
+<a id="openSheet" class="action-btn" target="_blank">🔗 Open Spreadsheet</a>
+<a id="downloadExcel" class="action-btn" target="_blank">⬇ Download Excel</a>
 </div>
 
 </div>
 
 </div>
-
 </div>
 
 <script>
 
+/* TOGGLE SIDEBAR FUNCTION */
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  
+  if (sidebar.classList.contains("focus-mode")) {
+    // 1. Jika sedang dalam mode nampilin 1 menu, klik hamburger -> TAMPILKAN SEMUA
+    sidebar.classList.remove("focus-mode");
+    if (window.innerWidth <= 768) {
+      sidebar.classList.add("active"); // Munculkan di mobile
+    }
+  } else {
+    // 2. Jika sedang nampil semua menu -> TOGGLE BIASA (Sembunyikan/Tampilkan)
+    if (window.innerWidth <= 768) {
+      sidebar.classList.toggle("active");
+    } else {
+      sidebar.classList.toggle("collapsed");
+    }
+  }
+}
+
+/* FUNGSI TUTUP MANUAL DI MOBILE (Tombol X) */
+function closeSidebarOnly() {
+  document.getElementById("sidebar").classList.remove("active");
+}
+
 /* LOAD REPORT */
-function load(previewUrl, editUrl, downloadUrl, element){
+function load(previewUrl, editUrl, downloadUrl, element) {
+  const sidebar = document.getElementById("sidebar");
 
-document.getElementById("welcome").style.display="none"; document.getElementById("gameArea").style.display="none";
+  document.getElementById("welcome").style.display="none"; 
+  document.getElementById("gameArea").style.display="none";
 
-const frame=document.getElementById("frame");
+  const frame=document.getElementById("frame");
+  const loading=document.getElementById("loading");
+  const actions=document.getElementById("actions");
 
-const loading=document.getElementById("loading");
+  /* RESET SEMUA MENU */
+  document.querySelectorAll(".menu-item").forEach(item=>{
+    item.classList.remove("active");
+  });
+  
+  /* SET MENU YG DIKLIK JADI AKTIF */
+  element.classList.add("active");
 
-const actions=document.getElementById("actions");
+  /* AKTIFKAN FOCUS MODE (Sembunyikan menu lain & kecilkan sidebar) */
+  sidebar.classList.add("focus-mode");
 
-/* ACTIVE MENU */
-document.querySelectorAll(".menu-item").forEach(item=>{
-item.classList.remove("active");
-});
+  /* KHUSUS MOBILE: Langsung geser sidebar keluar layar agar area iframe maksimal */
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove("active");
+  }
 
-element.classList.add("active");
+  /* SHOW LOADING */
+  loading.style.display="block";
+  frame.style.display="none";
+  actions.style.display="none";
 
-/* SHOW LOADING */
-loading.style.display="block";
+  frame.src=previewUrl;
 
-frame.style.display="none";
+  /* ACTION BUTTON */
+  document.getElementById("openSheet").href=editUrl;
+  document.getElementById("downloadExcel").href=downloadUrl;
 
-actions.style.display="none";
+  /* AFTER LOAD */
+  frame.onload = function(){
+    loading.style.display="none";
+    frame.style.display="block";
 
-frame.src=previewUrl;
-
-/* ACTION BUTTON */
-document.getElementById("openSheet").href=editUrl;
-
-document.getElementById("downloadExcel").href=downloadUrl;
-
-/* AFTER LOAD */
-frame.onload=function(){
-
-loading.style.display="none";
-
-frame.style.display="block";
-
-/* Sembunyikan actions bar jika url berisi '#' */
-if(editUrl === '#' || downloadUrl === '#') {
-    actions.style.display="none";
-} else {
-    actions.style.display="flex";
+    if(editUrl === '#' || downloadUrl === '#') {
+        actions.style.display="none";
+    } else {
+        actions.style.display="flex";
+    }
+  };
 }
-
-};
-
-}
-
 
 /* GAME HUB */
-
 function showGameHub(element){
+  const sidebar = document.getElementById("sidebar");
 
-document.querySelectorAll(".menu-item").forEach(item=>item.classList.remove("active"));
-element.classList.add("active");
+  document.querySelectorAll(".menu-item").forEach(item=>item.classList.remove("active"));
+  element.classList.add("active");
 
-document.getElementById("frame").style.display="none";
-document.getElementById("actions").style.display="none";
-document.getElementById("loading").style.display="none";
-document.getElementById("welcome").style.display="none"; document.getElementById("gameArea").style.display="none";
+  /* AKTIFKAN FOCUS MODE */
+  sidebar.classList.add("focus-mode");
+  
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove("active");
+  }
 
-const gameArea=document.getElementById("gameArea");
-gameArea.style.display="block";
+  document.getElementById("frame").style.display="none";
+  document.getElementById("actions").style.display="none";
+  document.getElementById("loading").style.display="none";
+  document.getElementById("welcome").style.display="none"; 
+  document.getElementById("gameArea").style.display="none";
 
-gameArea.innerHTML=`
-<div style="padding:40px;text-align:center;">
-<h1 style="font-size:48px;color:#0d2d52;">☕ BREAK ROOM</h1>
-<p>Pilih permainan favoritmu</p>
+  const gameArea=document.getElementById("gameArea");
+  gameArea.style.display="block";
 
-<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:30px;">
-<button onclick="loadSudoku()" style="padding:18px 30px;font-size:18px;">🔢 Sudoku</button>
-<button onclick="loadHextris()" style="padding:18px 30px;font-size:18px;">✨ Hextris</button>
-<button onclick="load2048()" style="padding:18px 30px;font-size:18px;">⚄ 2048</button>
-<button onclick="loadFlappy()" style="padding:18px 30px;font-size:18px;">🐦 Flappy Bird</button>
-<button onclick="loadChess()" style="padding:18px 30px;font-size:18px;">♘ Chess</button>
-</div>
-<div style="
-margin-top:25px;
-text-align:center;
-font-size:14px;
-color:#666;
-font-style:italic;
-">
+  gameArea.innerHTML=`
+  <div style="padding:40px;text-align:center;">
+  <h1 style="font-size:48px;color:#0d2d52;">☕ BREAK ROOM</h1>
+  <p>Pilih permainan favoritmu</p>
 
-☕ Room ini hanya untuk hiburan ringan saat waktu istirahat / diluar jam kerja.<br>
-Gunakan secara bijak dan tetap utamakan pekerjaan ya.
-
-</div>
-</div>`;
+  <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:30px;">
+  <button onclick="loadSudoku()" style="padding:18px 30px;font-size:18px;border-radius:8px;border:none;background:#0d7cc1;color:white;cursor:pointer;">🔢 Sudoku</button>
+  <button onclick="loadHextris()" style="padding:18px 30px;font-size:18px;border-radius:8px;border:none;background:#0d7cc1;color:white;cursor:pointer;">✨ Hextris</button>
+  <button onclick="load2048()" style="padding:18px 30px;font-size:18px;border-radius:8px;border:none;background:#0d7cc1;color:white;cursor:pointer;">⚄ 2048</button>
+  <button onclick="loadFlappy()" style="padding:18px 30px;font-size:18px;border-radius:8px;border:none;background:#0d7cc1;color:white;cursor:pointer;">🐦 Flappy Bird</button>
+  <button onclick="loadChess()" style="padding:18px 30px;font-size:18px;border-radius:8px;border:none;background:#0d7cc1;color:white;cursor:pointer;">♘ Chess</button>
+  </div>
+  <div style="margin-top:25px;text-align:center;font-size:14px;color:#666;font-style:italic;">
+  ☕ Room ini hanya untuk hiburan ringan saat waktu istirahat / diluar jam kerja.<br>
+  Gunakan secara bijak dan tetap utamakan pekerjaan ya.
+  </div>
+  </div>`;
 }
 
 function loadSudoku(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://cdn.htmlgames.com/SudokuClassic/"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+  document.getElementById("gameArea").innerHTML=`
+  <iframe src="https://cdn.htmlgames.com/SudokuClassic/" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
 
-
 function loadHextris(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://hextris.io/"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+  document.getElementById("gameArea").innerHTML=`
+  <iframe src="https://hextris.io/" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
 
 function load2048(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://funhtml5games.com/?play=2048bit"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+  document.getElementById("gameArea").innerHTML=`
+  <iframe src="https://funhtml5games.com/?play=2048bit" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
 
 function loadFlappy(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://funhtml5games.com/?play=flappy"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+  document.getElementById("gameArea").innerHTML=`
+  <iframe src="https://funhtml5games.com/?play=flappy" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
 
 function loadChess(){
-
-gameArea.innerHTML=`
-<iframe
-src="https://cdn.htmlgames.com/Chess/"
-style="
-width:100%;
-height:100%;
-border:none;
-display:block;
-">
-</iframe>`;
-
+  document.getElementById("gameArea").innerHTML=`
+  <iframe src="https://cdn.htmlgames.com/Chess/" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
 
 
 /* SEARCH */
 function filterMenu(){
-
-let input=document
-.getElementById("searchInput")
-.value.toLowerCase();
-
-let items=document.querySelectorAll(".menu-item");
-
-items.forEach(item=>{
-
-let text=item.innerText.toLowerCase();
-
-item.style.display=
-text.includes(input)
-? "block"
-: "none";
-
-});
-
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  let items = document.querySelectorAll(".menu-item");
+  items.forEach(item => {
+    let text = item.innerText.toLowerCase();
+    item.style.display = text.includes(input) ? "block" : "none";
+  });
 }
 
 /* CLOCK */
 function updateClock(){
-
-const now=new Date();
-
-document.getElementById("clock").innerHTML=
-now.toLocaleTimeString();
-
-document.getElementById("date").innerHTML=
-now.toDateString();
-
+  const now = new Date();
+  document.getElementById("clock").innerHTML = now.toLocaleTimeString();
+  document.getElementById("date").innerHTML = now.toDateString();
 }
-
 setInterval(updateClock,1000);
-
 updateClock();
 
 /* DARK MODE */
 function toggleDarkMode(){
-
-document.body.classList.toggle("dark");
-
-const btn=document.getElementById("darkToggle");
-
-if(document.body.classList.contains("dark")){
-
-btn.innerHTML="☀";
-
-localStorage.setItem("theme","dark");
-
-}else{
-
-btn.innerHTML="🌙";
-
-localStorage.setItem("theme","light");
-
-}
-
+  document.body.classList.toggle("dark");
+  const btn = document.getElementById("darkToggle");
+  if(document.body.classList.contains("dark")){
+    btn.innerHTML="☀";
+    localStorage.setItem("theme","dark");
+  } else {
+    btn.innerHTML="🌙";
+    localStorage.setItem("theme","light");
+  }
 }
 
 /* SAVE THEME */
 if(localStorage.getItem("theme")==="dark"){
-
-document.body.classList.add("dark");
-
-document.getElementById("darkToggle").innerHTML="☀";
-
+  document.body.classList.add("dark");
+  document.getElementById("darkToggle").innerHTML="☀";
 }
-
 </script>
 
 <img
@@ -1035,7 +799,6 @@ src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHM1cW9pemY5eG5nYndiNnBpe
 
 <script>
 const butterfly = document.getElementById("butterfly");
-
 let x = window.innerWidth * 0.3;
 let y = 150;
 
@@ -1043,30 +806,22 @@ butterfly.style.left = x + "px";
 butterfly.style.top = y + "px";
 
 function moveButterfly(){
-
-    // Gerak acak ±150px
     x += (Math.random() - 0.5) * 300;
     y += (Math.random() - 0.5) * 200;
-
-    // Batas layar
     x = Math.max(0, Math.min(window.innerWidth - 50, x));
     y = Math.max(80, Math.min(window.innerHeight - 80, y));
 
     butterfly.style.left = x + "px";
     butterfly.style.top = y + "px";
-
-    // Putar sedikit
+    
     const angle = (Math.random() - 0.5) * 60;
     butterfly.style.transform = `rotate(${angle}deg)`;
 }
 
-// Bergerak tiap 5–8 detik
 moveButterfly();
-
 setInterval(() => {
     moveButterfly();
 }, 5000 + Math.random() * 3000);
-
 </script>
 
 </body>
