@@ -42,53 +42,35 @@ body {
 .container {
   display: flex;
   height: 78vh;
-  gap: 10px;
   padding: 10px;
   box-sizing: border-box;
+  gap: 0; /* Gap dipindah ke margin sidebar agar bisa di-nol-kan saat minimize */
 }
 
 /* SIDEBAR */
 .sidebar {
   width: 320px;
+  min-width: 320px;
+  margin-right: 10px; /* Pengganti gap container */
   background: white;
   border-radius: 12px;
   padding: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease, left 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-/* CLASS UNTUK MINIMIZE SIDEBAR (SEMBUNYI PENUH) */
+/* CLASS UNTUK MINIMIZE SIDEBAR (SEMBUNYI TOTAL DI DESKTOP) */
 .sidebar.collapsed {
   width: 0;
+  min-width: 0;
   padding-left: 0;
   padding-right: 0;
+  margin-right: 0;
   opacity: 0;
   border: none;
 }
-
-/* --- MODE FOKUS: HANYA TAMPIL 1 MENU AKTIF --- */
-.sidebar.focus-mode {
-  width: fit-content; 
-  max-width: 320px;
-  overflow-y: hidden;
-}
-
-.sidebar.focus-mode h2,
-.sidebar.focus-mode #searchInput,
-.sidebar.focus-mode hr,
-.sidebar.focus-mode .menu-item:not(.active) {
-  display: none !important; /* Sembunyikan semua elemen kecuali menu aktif */
-}
-
-.sidebar.focus-mode .menu-item.active {
-  margin-bottom: 0;
-  pointer-events: none; /* Tidak bisa diklik berulang kali saat sedang aktif */
-  box-shadow: 0 4px 12px rgba(13,124,193,0.3);
-}
-
-/* ------------------------------------------- */
 
 .sidebar h2 {
   margin-top: 0;
@@ -145,6 +127,7 @@ body {
 .menu-item.active {
   background: #063d63 !important;
   transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(13,124,193,0.5);
 }
 
 /* MAIN */
@@ -154,6 +137,7 @@ body {
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  transition: all 0.3s ease;
 }
 
 .topbar {
@@ -374,7 +358,8 @@ body.dark #sidebarToggle:hover { background: #374151; }
     border-radius: 0 12px 12px 0;
     box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     padding: 20px;
-    opacity: 1 !important; 
+    margin-right: 0;
+    opacity: 1 !important; /* Timpa opacity collapse dari desktop */
   }
   
   .sidebar.active {
@@ -613,19 +598,12 @@ Silakan pilih menu report di sebelah kiri untuk memulai.
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   
-  if (sidebar.classList.contains("focus-mode")) {
-    // 1. Jika sedang dalam mode nampilin 1 menu, klik hamburger -> TAMPILKAN SEMUA
-    sidebar.classList.remove("focus-mode");
-    if (window.innerWidth <= 768) {
-      sidebar.classList.add("active"); // Munculkan di mobile
-    }
+  if (window.innerWidth <= 768) {
+    // Mode HP: Tampilkan/Sembunyikan dari kiri
+    sidebar.classList.toggle("active");
   } else {
-    // 2. Jika sedang nampil semua menu -> TOGGLE BIASA (Sembunyikan/Tampilkan)
-    if (window.innerWidth <= 768) {
-      sidebar.classList.toggle("active");
-    } else {
-      sidebar.classList.toggle("collapsed");
-    }
+    // Mode Desktop: Ciutkan sepenuhnya
+    sidebar.classList.toggle("collapsed");
   }
 }
 
@@ -653,12 +631,11 @@ function load(previewUrl, editUrl, downloadUrl, element) {
   /* SET MENU YG DIKLIK JADI AKTIF */
   element.classList.add("active");
 
-  /* AKTIFKAN FOCUS MODE (Sembunyikan menu lain & kecilkan sidebar) */
-  sidebar.classList.add("focus-mode");
-
-  /* KHUSUS MOBILE: Langsung geser sidebar keluar layar agar area iframe maksimal */
+  /* OTOMATIS TUTUP SIDEBAR SAAT MENU DIKLIK (Berlaku Desktop & Mobile) */
   if (window.innerWidth <= 768) {
     sidebar.classList.remove("active");
+  } else {
+    sidebar.classList.add("collapsed");
   }
 
   /* SHOW LOADING */
@@ -692,11 +669,11 @@ function showGameHub(element){
   document.querySelectorAll(".menu-item").forEach(item=>item.classList.remove("active"));
   element.classList.add("active");
 
-  /* AKTIFKAN FOCUS MODE */
-  sidebar.classList.add("focus-mode");
-  
+  /* OTOMATIS TUTUP SIDEBAR */
   if (window.innerWidth <= 768) {
     sidebar.classList.remove("active");
+  } else {
+    sidebar.classList.add("collapsed");
   }
 
   document.getElementById("frame").style.display="none";
@@ -751,7 +728,6 @@ function loadChess(){
   document.getElementById("gameArea").innerHTML=`
   <iframe src="https://cdn.htmlgames.com/Chess/" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
 }
-
 
 /* SEARCH */
 function filterMenu(){
