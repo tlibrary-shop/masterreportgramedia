@@ -35,6 +35,11 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8; 
         }
+        
+        /* CSS Khusus Anti-Terpotong untuk PDF */
+        tr {
+            page-break-inside: avoid !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen p-4 md:p-8 relative">
@@ -100,6 +105,7 @@
 
     <!-- TAILWIND MODAL (Pop-up Detail Per Toko) -->
     <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center transition-opacity p-4">
+        <!-- Tambahkan class h-full md:max-h-[95vh] agar di HP bisa discroll rapi -->
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
             <!-- Header Modal -->
             <div class="flex justify-between items-center p-4 md:p-5 bg-blue-800 text-white">
@@ -169,7 +175,7 @@
         let currentDetailFileName = "Detail_Toko";
 
         // URL Google Sheet 1 (Utama)
-        const sheetIdMain = '1U2jYvdm-ZYXOSh2MQe04nQJXNkfOExIiFvmh8K-hNkM';
+        const sheetIdMain = '1U2jYvdm-ZYXOSh2MQe04nQJXNKfOExliFvmh8k-hNkM';
         const gidMain = '1020016179';
         const csvUrlMain = `https://docs.google.com/spreadsheets/d/${sheetIdMain}/export?format=csv&gid=${gidMain}`;
 
@@ -268,7 +274,7 @@
         }
 
         // ==========================================
-        // FITUR PENCARIAN MANUAL (DIKEMBALIKAN HANYA ID & JUDUL)
+        // FITUR PENCARIAN MANUAL
         // ==========================================
         document.getElementById('manual-search-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
@@ -290,7 +296,6 @@
             if (!searchVal) {
                 matches = database;
             } else {
-                // Filter hanya berdasarkan ID ORIN, KODE BSOFT, atau JUDUL ITEM
                 matches = database.filter(dbRow => {
                     return cleanStr(dbRow['ID ORIN']).includes(searchVal) || 
                            cleanStr(dbRow['KODE BSOFT']).includes(searchVal) || 
@@ -466,7 +471,7 @@
         }
 
         // ==========================================
-        // RENDER PREVIEW (DENGAN TOMBOL DETAIL GABUNGAN)
+        // RENDER PREVIEW
         // ==========================================
         function renderPreview(dataArray) {
             if (dataArray.length === 0) return;
@@ -485,7 +490,6 @@
             headerRow += '</tr>';
             thead.innerHTML = headerRow;
 
-            // Batasi tampilan maksimal 100 baris agar browser tidak berat render HTML-nya
             const limit = Math.min(dataArray.length, 100); 
             for (let i = 0; i < limit; i++) {
                 let rowHtml = '<tr class="hover:bg-gray-50 border-b">';
@@ -518,7 +522,6 @@
                 tbody.innerHTML += rowHtml;
             }
             
-            // Tambahkan baris info jika data yang dirender dipotong
             if (dataArray.length > limit) {
                 tbody.innerHTML += `<tr><td colspan="${headers.length}" class="py-3 md:py-4 text-center text-gray-500 font-semibold bg-gray-50 text-xs md:text-sm">Menampilkan ${limit} dari ${dataArray.length} data. Silakan gunakan tombol Export untuk melihat keseluruhan data.</td></tr>`;
             }
@@ -542,13 +545,12 @@
             const yyyy = now.getFullYear();
             const dateStr = dd + mm + yyyy;
             
-            // Tampilkan tanggal cetak untuk keperluan PDF
             document.getElementById('pdf-print-date').innerText = `${dd}/${mm}/${yyyy}`;
 
             const safeJudul = judulItem.replace(/[^a-zA-Z0-9 ]/g, "").trim().replace(/\s+/g, '-').toUpperCase();
 
             currentDetailData = [];
-            currentDetailFileName = `Detail_Toko_${dateStr}_${safeJudul}`; // Tanpa ekstensi, ekstensi diatur di fungsi export
+            currentDetailFileName = `Detail_Toko_${dateStr}_${safeJudul}`; 
 
             const stores = dataStore.filter(row => cleanStr(row[1]) === cleanStr(idOrin));
             let hasData = false;
@@ -615,7 +617,7 @@
         }
 
         // ==========================================
-        // FUNGSI EXPORT TO PDF (Dari Tampilan Web Modal)
+        // FUNGSI EXPORT TO PDF (Diperbaiki)
         // ==========================================
         function exportDetailToPDF() {
             if (currentDetailData.length === 0) {
@@ -623,24 +625,36 @@
                 return;
             }
 
-            // Elemen yang akan di-convert (Bagian Body Modal)
             const element = document.getElementById('pdf-content');
             const pdfHeader = document.getElementById('pdf-header-title');
             
-            // Tampilkan Header Judul Resmi sementara proses cetak PDF
+            // 1. Simpan class asli agar bisa dikembalikan nanti
+            const originalClasses = element.className;
+            
+            // 2. Tampilkan Header
             pdfHeader.classList.remove('hidden');
-
+            
+            // 3. Hapus batasan scroll & tinggi sebelum di-render PDF agar terbaca penuh dari atas
+            element.className = "p-4 md:p-8 bg-white w-full"; 
+            
             const opt = {
-                margin:       [0.5, 0.5, 0.5, 0.5], // margin in inches
+                margin:       [0.5, 0.5, 0.5, 0.5], 
                 filename:     currentDetailFileName + ".pdf",
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true }, // scale 2 untuk resolusi yang jernih
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true,
+                    scrollY: 0 // KUNCI UTAMA: Memaksa render dari koordinat Y paling atas
+                }, 
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: 'css', avoid: 'tr' } // KUNCI UTAMA: Hindari memotong tag <tr> (baris tabel)
             };
 
-            // Generate dan simpan PDF, setelah selesai sembunyikan lagi Header Judul
+            // 4. Proses render PDF
             html2pdf().set(opt).from(element).save().then(() => {
+                // 5. Kembalikan semua state ke kondisi semula setelah selesai download
                 pdfHeader.classList.add('hidden');
+                element.className = originalClasses;
             });
         }
     </script>
