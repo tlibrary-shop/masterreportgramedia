@@ -105,16 +105,30 @@
 
     <!-- TAILWIND MODAL (Pop-up Detail Per Toko) -->
     <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center transition-opacity p-4">
-        <!-- Tambahkan class h-full md:max-h-[95vh] agar di HP bisa discroll rapi -->
+        <!-- class overflow-hidden membatasi batas max agar scroll hanya di bagian konten tabel -->
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+            
             <!-- Header Modal -->
             <div class="flex justify-between items-center p-4 md:p-5 bg-blue-800 text-white">
                 <h5 class="font-bold text-lg md:text-xl">Rincian Per Toko Gramedia</h5>
                 <button onclick="closeModal()" class="text-white hover:text-gray-300 font-bold text-2xl md:text-3xl leading-none">&times;</button>
             </div>
+
+            <!-- Toolbar Tombol Export (Sekarang Di Atas!) -->
+            <div class="p-3 bg-gray-50 border-b flex flex-col sm:flex-row justify-between items-center gap-3">
+                <span class="text-xs md:text-sm text-gray-600 font-semibold hidden sm:block">Aksi Laporan:</span>
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button onclick="exportDetailToExcel()" class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm shadow-sm">
+                        📥 Export Excel
+                    </button>
+                    <button onclick="exportDetailToPDF()" class="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm shadow-sm">
+                        📄 Export PDF
+                    </button>
+                </div>
+            </div>
             
-            <!-- Body Modal (Bagian ini yang akan di-convert ke PDF) -->
-            <div id="pdf-content" class="p-4 md:p-6 overflow-y-auto bg-white">
+            <!-- Body Modal (Bagian ini yang bisa discroll dan di-convert ke PDF) -->
+            <div id="pdf-content" class="p-4 md:p-6 overflow-y-auto bg-white flex-1">
                 
                 <!-- Judul khusus PDF (Sembunyi saat di web) -->
                 <div id="pdf-header-title" class="hidden text-center mb-6 border-b-2 border-gray-800 pb-2">
@@ -149,16 +163,8 @@
                 </div>
             </div>
 
-            <!-- Footer Modal -->
-            <div class="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3">
-                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <button onclick="exportDetailToExcel()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm md:text-base">
-                        📥 Export Excel
-                    </button>
-                    <button onclick="exportDetailToPDF()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition flex justify-center items-center gap-2 text-sm md:text-base">
-                        📄 Export PDF
-                    </button>
-                </div>
+            <!-- Footer Modal (Sekarang hanya untuk tombol tutup) -->
+            <div class="p-3 border-t bg-gray-50 flex justify-end">
                 <button onclick="closeModal()" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition text-sm md:text-base">Tutup</button>
             </div>
         </div>
@@ -175,7 +181,7 @@
         let currentDetailFileName = "Detail_Toko";
 
         // URL Google Sheet 1 (Utama)
-        const sheetIdMain = '1U2jYvdm-ZYXOSh2MQe04nQJXNkfOExIiFvmh8K-hNkM';
+        const sheetIdMain = '1U2jYvdm-ZYXOSh2MQe04nQJXNKfOExliFvmh8k-hNkM';
         const gidMain = '1020016179';
         const csvUrlMain = `https://docs.google.com/spreadsheets/d/${sheetIdMain}/export?format=csv&gid=${gidMain}`;
 
@@ -617,7 +623,7 @@
         }
 
         // ==========================================
-        // FUNGSI EXPORT TO PDF (Diperbaiki)
+        // FUNGSI EXPORT TO PDF
         // ==========================================
         function exportDetailToPDF() {
             if (currentDetailData.length === 0) {
@@ -628,13 +634,8 @@
             const element = document.getElementById('pdf-content');
             const pdfHeader = document.getElementById('pdf-header-title');
             
-            // 1. Simpan class asli agar bisa dikembalikan nanti
             const originalClasses = element.className;
-            
-            // 2. Tampilkan Header
             pdfHeader.classList.remove('hidden');
-            
-            // 3. Hapus batasan scroll & tinggi sebelum di-render PDF agar terbaca penuh dari atas
             element.className = "p-4 md:p-8 bg-white w-full"; 
             
             const opt = {
@@ -644,15 +645,13 @@
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true,
-                    scrollY: 0 // KUNCI UTAMA: Memaksa render dari koordinat Y paling atas
+                    scrollY: 0
                 }, 
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: 'css', avoid: 'tr' } // KUNCI UTAMA: Hindari memotong tag <tr> (baris tabel)
+                pagebreak:    { mode: 'css', avoid: 'tr' }
             };
 
-            // 4. Proses render PDF
             html2pdf().set(opt).from(element).save().then(() => {
-                // 5. Kembalikan semua state ke kondisi semula setelah selesai download
                 pdfHeader.classList.add('hidden');
                 element.className = originalClasses;
             });
