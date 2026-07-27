@@ -69,7 +69,34 @@
         <!-- FITUR 2: Area Drag & Drop Bulk Upload -->
         <div class="mb-6">
             <label class="block text-gray-800 font-bold mb-2">📂 Fitur 2: Upload Excel Mentah (Massal)</label>
-            <p class="text-xs md:text-sm text-gray-600 mb-2">Upload file Excel Anda (mengandung kolom Item Id/ID ORIN/KODE BSOFT/iditem). Sistem otomatis memindai dan memproses datanya.</p>
+            <p class="text-xs md:text-sm text-gray-600 mb-4">Upload file Excel Anda (mengandung kolom Item Id/ID ORIN/KODE BSOFT/iditem). Sistem otomatis memindai dan memproses datanya.</p>
+            
+            <!-- Pengaturan Checkbox Kolom yang ingin ditarik -->
+            <div class="mb-4 bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <label class="block text-gray-800 font-bold mb-2 text-sm md:text-base">⚙️ Pilih Kolom yang Ingin Ditarik (Khusus Upload):</label>
+                <p class="text-xs md:text-sm text-gray-600 mb-3">Centang data apa saja yang ingin Anda sisipkan ke dalam file Excel Anda (hilangkan centang jika tidak butuh).</p>
+                <div class="flex flex-wrap gap-4 text-xs md:text-sm font-semibold text-gray-700">
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-orin" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> ID ORIN
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-bsoft" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> KODE BSOFT
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-judul" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> JUDUL ITEM
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-harga" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> HARGA
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-sold" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> SOLD
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer hover:text-blue-600">
+                        <input type="checkbox" id="chk-eoh" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked> EOH
+                    </label>
+                </div>
+            </div>
+
             <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 md:p-8 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer relative">
                 <div class="text-gray-500 pointer-events-none">
                     <span class="text-3xl md:text-4xl block mb-2">📥</span>
@@ -187,7 +214,7 @@
 
         // URL Google Sheet 2 (Per Store)
         const sheetIdStore = '1w5mvbBtPe8hgw-eu6MinYbOalU-vndW4Qkr4XBGE9N8';
-        const gidStore = '84159564';
+        const gidStore = '1548128698';
         const csvUrlStore = `https://docs.google.com/spreadsheets/d/${sheetIdStore}/export?format=csv&gid=${gidStore}`;
 
         // Utility: Membersihkan string 
@@ -429,6 +456,14 @@
                     userExcelData.push(rowObj);
                 }
 
+                // AMBIL NILAI DARI CHECKBOX
+                const wantOrin = document.getElementById('chk-orin').checked;
+                const wantBsoft = document.getElementById('chk-bsoft').checked;
+                const wantJudul = document.getElementById('chk-judul').checked;
+                const wantHarga = document.getElementById('chk-harga').checked;
+                const wantSold = document.getElementById('chk-sold').checked;
+                const wantEoh = document.getElementById('chk-eoh').checked;
+
                 processedData = userExcelData.map(row => {
                     let match = null;
                     
@@ -442,20 +477,29 @@
                     }
 
                     if (match) {
+                        // Copy data asli agar kolom lama milik user tidak hilang
+                        let newRow = { ...row };
+                        
                         const finalId = match['ID ORIN'] || row['ID ORIN'] || row['Item Id'] || '';
                         const finalJudul = match['JUDUL ITEM'] || row['JUDUL ITEM'] || row['judul'] || row['Judul'] || '';
-                        const { totalSold, totalEoh } = calcStoreData(finalId);
+                        const hargaVal = match['HARGA'] !== undefined ? match['HARGA'] : (row['HARGA'] || '');
 
-                        return {
-                            ...row, 
-                            'ID ORIN': finalId,
-                            'KODE BSOFT': match['KODE BSOFT'] || row['KODE BSOFT'] || row['iditem'] || '',
-                            'JUDUL ITEM': finalJudul,
-                            'HARGA': match['HARGA'] !== undefined ? match['HARGA'] : (row['HARGA'] || ''),
-                            'SOLD (TERJUAL BULAN INI)': totalSold,
-                            'EOH (STOK AKHIR GRAMEDIA)': totalEoh,
-                            'STATUS SYSTEM': '✅ MATCHED'
-                        };
+                        // Kalkulasi jika dibutuhkan
+                        if (wantSold || wantEoh) {
+                            const { totalSold, totalEoh } = calcStoreData(finalId);
+                            if (wantSold) newRow['SOLD (TERJUAL BULAN INI)'] = totalSold;
+                            if (wantEoh) newRow['EOH (STOK AKHIR GRAMEDIA)'] = totalEoh;
+                        }
+
+                        // Sisipkan kolom sesuai centang
+                        if (wantOrin) newRow['ID ORIN'] = finalId;
+                        if (wantBsoft) newRow['KODE BSOFT'] = match['KODE BSOFT'] || row['KODE BSOFT'] || row['iditem'] || '';
+                        if (wantJudul) newRow['JUDUL ITEM'] = finalJudul;
+                        if (wantHarga) newRow['HARGA'] = hargaVal;
+                        
+                        newRow['STATUS SYSTEM'] = '✅ MATCHED';
+
+                        return newRow;
                     } else {
                         return {
                             ...row,
@@ -503,9 +547,10 @@
                 headers.forEach(header => {
                     let val = dataArray[i][header] !== undefined ? dataArray[i][header] : '';
                     
-                    let idOrin = escapeAttr(dataArray[i]['ID ORIN'] || '-');
-                    let kodeBsoft = escapeAttr(dataArray[i]['KODE BSOFT'] || '-');
-                    let judulItem = escapeAttr(dataArray[i]['JUDUL ITEM'] || '-');
+                    // Ambil identifier aman untuk pass ke tombol detail (antisipasi kolom di-uncheck)
+                    let idOrin = escapeAttr(dataArray[i]['ID ORIN'] || dataArray[i]['Item Id'] || '-');
+                    let kodeBsoft = escapeAttr(dataArray[i]['KODE BSOFT'] || dataArray[i]['iditem'] || '-');
+                    let judulItem = escapeAttr(dataArray[i]['JUDUL ITEM'] || dataArray[i]['judul'] || dataArray[i]['Judul'] || '-');
                     let harga = escapeAttr(dataArray[i]['HARGA'] || '-');
 
                     if (header === 'SOLD (TERJUAL BULAN INI)' || header === 'EOH (STOK AKHIR GRAMEDIA)') {
