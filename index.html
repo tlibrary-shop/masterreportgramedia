@@ -259,10 +259,11 @@
             </div>
 
             <div class="relative group flex items-center justify-center w-full">
+                <!-- UPDATE IKON KE TWIDY TOOLS -->
                 <button id="left-btn-10" onclick="openMenu(10)" class="left-icon-btn w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 border border-transparent">
-                    <i class="fa-solid fa-mug-hot text-base md:text-lg"></i>
+                    <i class="fa-solid fa-screwdriver-wrench text-base md:text-lg"></i>
                 </button>
-                <span class="hidden md:block absolute left-16 bg-panel border border-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl">BREAK ROOM</span>
+                <span class="hidden md:block absolute left-16 bg-panel border border-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl">TWIDY TOOLS</span>
             </div>
         </div>
 
@@ -306,7 +307,7 @@
         <!-- LAYOUT: CENTER + RIGHT -->
         <div class="relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-6 h-[calc(100%-4rem)] md:h-[calc(100%-5rem)] xl:h-[calc(100%-6rem)]">
             
-            <!-- CENTER AREA (Diubah menjadi flex-1 w-full agar merespons dinamis saat panel kanan hilang) -->
+            <!-- CENTER AREA -->
             <div class="flex-1 w-full relative rounded-[20px] md:rounded-[32px] overflow-hidden border border-white/10 shadow-2xl bg-panel transition-all duration-400">
                 
                 <!-- LAYER 0: HOME -->
@@ -317,7 +318,7 @@
                     <div class="absolute inset-0 p-5 md:p-8 flex flex-col justify-between">
                         <!-- Judul Kiri Atas -->
                         <div>
-                            <h2 class="text-3xl md:text-4xl font-bold text-white mb-1 md:mb-2 tracking-tight drop-shadow-lg">AO Dashboard</h2>
+                            <h2 class="text-3xl md:text-4xl font-bold text-white mb-1 md:mb-2 tracking-tight drop-shadow-lg">Admin TB Dashboard</h2>
                             <p class="text-gray-200 text-xs md:text-sm drop-shadow-md">Manage your daily operations efficiently.</p>
                         </div>
                         
@@ -365,7 +366,6 @@
                             </div>
                         </div>
                         <div class="flex gap-2 shrink-0">
-                            <!-- Tombol Menu (Sekarang selalu muncul agar panel bisa dibuka lagi) -->
                             <button onclick="toggleRightPanel()" class="flex px-3 py-2 md:px-4 rounded-lg md:rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium text-sm transition items-center justify-center gap-2">
                                 <i class="fa-solid fa-list-ul"></i> <span class="hidden sm:inline">Menu</span>
                             </button>
@@ -392,7 +392,6 @@
                             </div>
                         </div>
                         <div class="flex gap-2 shrink-0">
-                            <!-- Tombol Menu (Sekarang selalu muncul agar panel bisa dibuka lagi) -->
                             <button onclick="toggleRightPanel()" class="flex px-3 py-2 md:px-4 rounded-lg md:rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium text-sm transition items-center justify-center gap-2">
                                 <i class="fa-solid fa-list-ul"></i> <span class="hidden sm:inline">Menu</span>
                             </button>
@@ -409,18 +408,32 @@
                     </div>
                 </div>
 
-                <!-- LAYER 3: COMING SOON (MENU 10 - BREAK ROOM) -->
-                <div id="view-coming-soon" class="view-layer flex items-center justify-center bg-panel px-4 relative">
-                    <div class="text-center max-w-sm relative">
-                        <button onclick="toggleRightPanel()" class="absolute -top-16 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm flex items-center gap-2 transition">
-                            <i class="fa-solid fa-list-ul"></i> Buka Menu
-                        </button>
-
-                        <div class="w-20 h-20 md:w-24 md:h-24 rounded-[20px] md:rounded-3xl bg-[#6e2c33]/20 flex items-center justify-center mx-auto mb-4 md:mb-6 border border-[#6e2c33]/50">
-                            <i class="fa-solid fa-mug-hot text-4xl md:text-5xl text-[#e8707e]"></i>
+                <!-- LAYER 3: TWIDY TOOLS (MENU 10) -->
+                <div id="view-twidytools" class="view-layer flex flex-col bg-white">
+                    <div class="px-4 md:px-6 py-3 md:py-4 flex justify-between items-center bg-panel border-b border-white/10 shrink-0 gap-2">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <!-- Warna mengikuti palet sebelumnya -->
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#6e2c33]/20 flex items-center justify-center text-[#e8707e] shrink-0">
+                                <i class="fa-solid fa-screwdriver-wrench text-base md:text-lg"></i>
+                            </div>
+                            <div class="truncate">
+                                <h2 class="text-base md:text-lg font-bold text-white leading-tight truncate">TWIDY TOOLS</h2>
+                                <p class="text-[10px] md:text-xs text-textDim truncate">Web App Integration</p>
+                            </div>
                         </div>
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3">COMING SOON</h2>
-                        <p class="text-gray-400 text-xs md:text-sm">Ruang istirahat dan fitur tambahan sedang dalam tahap pengembangan. Silakan kembali lagi nanti!</p>
+                        <div class="flex gap-2 shrink-0">
+                            <!-- Tombol Menu -->
+                            <button onclick="toggleRightPanel()" class="flex px-3 py-2 md:px-4 rounded-lg md:rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium text-sm transition items-center justify-center gap-2">
+                                <i class="fa-solid fa-list-ul"></i> <span class="hidden sm:inline">Menu</span>
+                            </button>
+                            <a href="https://twidytools.my.id/" target="_blank" class="px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium text-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="hidden sm:inline">Buka Tab</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <!-- Menampilkan IFRAME Twidy Tools -->
+                        <iframe src="https://twidytools.my.id/" class="absolute inset-0 w-full h-full border-none"></iframe>
                     </div>
                 </div>
 
@@ -484,9 +497,10 @@
 
                 <div class="h-[1px] bg-white/10 my-1 mx-2"></div>
 
+                <!-- UPDATE NAMA KE TWIDY TOOLS -->
                 <button id="right-btn-10" onclick="openMenu(10)" class="report-menu-btn w-full flex items-center gap-3 md:gap-4 p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-panel/60">
-                    <div class="w-10 h-10 rounded-xl bg-[#6e2c33]/80 flex items-center justify-center text-[#e8707e] shrink-0"><i class="fa-solid fa-mug-hot text-lg"></i></div>
-                    <span class="text-left font-semibold text-gray-300 text-xs md:text-[13px] leading-snug whitespace-nowrap">BREAK ROOM</span>
+                    <div class="w-10 h-10 rounded-xl bg-[#6e2c33]/80 flex items-center justify-center text-[#e8707e] shrink-0"><i class="fa-solid fa-screwdriver-wrench text-lg"></i></div>
+                    <span class="text-left font-semibold text-gray-300 text-xs md:text-[13px] leading-snug whitespace-nowrap">Twidy Tools</span>
                 </button>
             </div>
         </div>
@@ -544,7 +558,7 @@
                 link: "https://1drv.ms/x/c/ba6cc96dfc7dbe16/IQD6r59ZeDhKSKSfnNWeoBwfAdVE4kdTxLUsc5DXt4vQaas?e=wJLmwD", 
                 icon: "fa-money-bill-wave", iconBg: "bg-[#1d6b41]/20", iconColor: "text-[#55e896]" 
             },
-            10: { type: 'coming-soon' }
+            10: { type: 'twidy' } // Update Tipe Menu 10
         };
 
         // Initialize Panel state on load (Tampil jika layar PC)
@@ -592,11 +606,11 @@
             homeBtn.classList.add('text-gray-400');
         }
 
-        // --- FUNGSI MEMBUKA MENU: PANEL KANAN SEKARANG OTOMATIS HILANG ---
+        // --- FUNGSI MEMBUKA MENU ---
         function openMenu(index) {
             resetAllActiveStates();
             
-            // Auto close panel saat menu dipilih (UNTUK SEMUA PERANGKAT - PC / HP)
+            // Auto close panel saat menu dipilih
             document.getElementById('right-panel').classList.add('hidden-panel');
 
             const activeLeftBtn = document.getElementById('left-btn-' + index);
@@ -613,8 +627,9 @@
 
             if (data.type === 'lookup') {
                 document.getElementById('view-lookup').classList.add('active');
-            } else if (data.type === 'coming-soon') {
-                document.getElementById('view-coming-soon').classList.add('active');
+            } else if (data.type === 'twidy') {
+                // Tampilkan Tampilan Twidy Tools
+                document.getElementById('view-twidytools').classList.add('active');
             } else if (data.type === 'excel') {
                 document.getElementById('view-excel').classList.add('active');
                 
@@ -628,7 +643,7 @@
             }
         }
 
-        // --- FUNGSI GO HOME: MENGEMBALIKAN PANEL SEPERTI AWAL ---
+        // --- FUNGSI GO HOME ---
         function goHome() {
             resetAllActiveStates();
             
